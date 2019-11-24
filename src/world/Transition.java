@@ -9,16 +9,11 @@ public class Transition {
 	 */
 	private boolean enabled;
 
-
-	private int idTransition;
-
 	private ArrayList<Arc> inputArcs;
 
 	private ArrayList<Arc> outputArcs;
 
-	public Transition( int idTransition) {
-
-		this.idTransition = idTransition;
+	public Transition( ) {
 		inputArcs=  new  ArrayList<>();
 		outputArcs=  new  ArrayList<>();
 	}
@@ -44,19 +39,11 @@ public class Transition {
 	}
 
 
-	public int getIdTransition() {
-		return idTransition;
-	}
 
-
-	public void setIdTransition(int idTransition) {
-		this.idTransition = idTransition;
-	}
-
-
-	public void fire() {
+	public void fire() throws UnsupportedNegativeNumberException {
 
 		for (Arc arc : inputArcs) {
+			
 			if(arc.verifyActive() ) {
 				enabled=true;
 			}

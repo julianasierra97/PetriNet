@@ -1,32 +1,33 @@
 package world;
 
 public class Arc {
-
-	
 	protected int weight;
 	
-	protected boolean output;
+	protected boolean outputFromTransition;
 	
 	protected Place place;
 	
 	protected boolean active;
 	
-	protected int id;
-	
 	protected Transition transition;
 	
 	
 	
-	public Arc( int idArc ) {
+	public Arc(  int weight) {
 
-		this.weight = 1;
-		this.output = false;
-		this.id=idArc;
+		this.weight = weight;
+		this.outputFromTransition = false;
 		
 	}
 
-	public void setWeight(int newWeight) {
-		this.weight=newWeight;
+	public void setWeight(int newWeight) throws UnsupportedNegativeNumberException {
+		if(newWeight>=0) {
+			this.weight=newWeight;
+		}
+		else {
+			throw new UnsupportedNegativeNumberException();
+		}
+		
 	}
 	
 	public int getWeight() {
@@ -48,11 +49,15 @@ public class Arc {
 	public void setPlace(Place place) {
 		this.place = place;
 	}
-
+	
+	public void setOutputFromTransition(boolean output2) {
+		outputFromTransition=output2;
+		
+	}
 
 	public boolean verifyActive() {
 			
-		if(place.getNbrTokens()>=weight&& !output) {
+		if(!outputFromTransition && place.getNbrTokens()>=weight ) {
 			active=true;
 		}
 		else {
@@ -63,14 +68,7 @@ public class Arc {
 		return active;
 	}
 
-	public void setOutput(boolean output2) {
-		output=output2;
-		
-	}
-
-	public int getId() {
-		
-		return id;
-	}
+	
+	
 	
 }

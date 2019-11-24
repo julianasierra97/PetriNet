@@ -2,21 +2,27 @@ package world;
 
 public interface PetriNetInterface {
 	
-	public void addPlace();
-	
-	public void addArc();
+	public void addPlace(int weight);
 
 	public void addTransition();
 	
-	public void deletePlace(int idPlace);
+	public void deletePlace(Place place);
 	
-	public void deleteArc(int idArc);
+	public void deleteArc(Arc arc);
 
-	public void deleteTransition(int idTransition);
+	public void deleteTransition(Transition transition);
 	
 	
 	public void fireAllTransitions();
 	
-	public void fireTransition(int idTransition);
+	public void fireTransition(Transition transition);
+
+	public void addArc(String type, int weight);
+	
+	public void changeTokenNumber(Place place, int newWeight);
+	
+	public void relateArcPlace(Place place, Arc arc);
+	
+	public void relateArcTransition(Transition transition,Arc arc,  boolean output);
 
 }

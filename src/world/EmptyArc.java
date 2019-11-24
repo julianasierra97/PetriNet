@@ -4,14 +4,14 @@ public class EmptyArc extends Arc{
 
 
 	
-	public EmptyArc(int id) {
-		super(id);
+	public EmptyArc( int weight) {
+		super( weight);
 
 		
 	}
 	//TODO  AskTeacher
 	public boolean verifyActive() {
-		if(place.getNbrTokens()>0&&!output) {
+		if(!outputFromTransition &&place.getNbrTokens()>0) {
 			active=true;
 			emptyAll();
 			

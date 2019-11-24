@@ -4,13 +4,15 @@ import java.util.ArrayList;
 
 public class PetriNet implements PetriNetInterface{
 
+	public static final String ARC = "Arc";
+
+	public static final String ZEROARC = "Zero Arc";
+
+	public static final String EMPTYARC = "Empty Arc";
 
 	private static ArrayList<Place> places;
 	private static ArrayList<Arc> arcs;
 	private static ArrayList<Transition> transitions;
-	private int nextPlaceId;
-	private int nextArcId;
-	private int nextTransitionId;
 
 
 
@@ -19,41 +21,51 @@ public class PetriNet implements PetriNetInterface{
 		this.places = new ArrayList<>();
 		this.arcs = new ArrayList<>();
 		this.transitions = new ArrayList<>();
-		this.nextPlaceId = 0;
-		this.nextTransitionId=0;
-	}
-
-	@Override
-	public void addPlace() {
-		places.add(new Place(nextPlaceId));
-		nextPlaceId++;
-
 
 	}
 
 	@Override
-	public void addArc() {
-		arcs.add(new Arc(nextArcId));
-		nextArcId++;
+	public void addPlace( int weight) {
+		places.add(new Place(weight));
+
+
+
+	}
+
+	@Override
+	public void addArc(String type, int weight) {
+		if(type.equals(PetriNet.ARC)) {
+			arcs.add(new Arc( weight));
+		}
+		else if(type.equals(PetriNet.ZEROARC)) {
+			arcs.add(new ZeroArc( weight));
+		}
+		else if(type.equals(PetriNet.EMPTYARC)) {
+			arcs.add(new EmptyArc( weight));
+		}
+
 
 	}
 
 	@Override
 	public void addTransition() {
-		transitions.add(new Transition(nextTransitionId));
-		nextTransitionId++;
+		transitions.add(new Transition());
 
 	}
 
+	@Override
 	public void relateArcPlace(Place place, Arc arc) {
-		arc.setPlace(place);
-
+		if(arc!=null) {
+			arc.setPlace(place);
+		}
 	}
 
 
+
+	@Override
 	public void relateArcTransition(Transition transition,Arc arc,  boolean output) {
 		arc.setTransition(transition);
-		arc.setOutput(output);
+		arc.setOutputFromTransition(output);
 		if(output) {
 			transition.addOutput(arc);
 		}
@@ -63,118 +75,135 @@ public class PetriNet implements PetriNetInterface{
 	}
 
 	@Override
-	public void deletePlace(int idPlace) {
-		for (Place place : places) {
-			if(place.getId()==idPlace) {
-				places.remove(place);
-				for (Arc arc : arcs) {
-					if (arc.getPlace().equals(place)) {
-						deleteArc(arc.getId());
-					}
-				}
-			}
-			
+	public void deletePlace(Place place) {
 
-		}
-	}
-
-
-	@Override
-	public void deleteArc(int idArc) {
+		places.remove(place);
 		for (Arc arc : arcs) {
-			if(arc.getId()==idArc) {
-				arcs.remove(arc);
+			if (arc.getPlace().equals(place)) {
+				deleteArc(arc);
 			}
 		}
 
+
+
+	}
+
+
+
+	@Override
+	public void deleteArc(Arc arc) {
+		arcs.remove(arc);
 	}
 
 	@Override
-	public void deleteTransition(int idTransition) {
-		for (Transition transition : transitions) {
-			if(transition.getIdTransition()==idTransition) {
-				transitions.remove(transition);
-				for (Arc arc : arcs) {
-					if (arc.getTransition().equals(transition)) {
-						deleteArc(arc.getId());
-					}
-				}
+	public void deleteTransition(Transition transition) {
+		transitions.remove(transition);
+		for (Arc arc : arcs) {
+			if (arc.getTransition().equals(transition)) {
+				deleteArc(arc);
 			}
 		}
+	}
 
+	@Override
+	public void changeTokenNumber(Place place, int newWeight) {
+		if(place!=null) {
+			try {
+				place.setTokens(newWeight);
+				for (Arc arc : arcs) {
+					if(arc.getPlace().equals(place)) {
+						if(!arc.outputFromTransition && arc.getClass()==EmptyArc.class) {
+							((EmptyArc)arc).emptyAll();						
+						}
+					}
+				}
+			} catch (UnsupportedNegativeNumberException e) {
+				System.out.println(e.getMessage());
+			}
+		}
 
 	}
 
 
-	
+
 
 	@Override
 	public void fireAllTransitions() {
-		for (Transition transition : transitions) {
-			transition.fire();
+		try {
+			for (Transition transition : transitions) {
+				transition.fire();
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
+
 
 	}
 
 	@Override
-	public void fireTransition(int idTransition) {
-		for (Transition transition : transitions) {
-			if(transition.getIdTransition()==idTransition) {
-				transition.fire();
+	public void fireTransition(Transition transition) {
+		try {
+			if(transition!=null) {
+				transition.fire();	
 			}
 		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+
 
 	}
 
 
 	public static void main(String[] args) {
 		PetriNet pn= new PetriNet();
+
+	
 		
-		pn.addPlace();
-		pn.addPlace();
-		pn.addPlace();
-		pn.addPlace();
-		pn.addPlace();
 		
+		
+		pn.addPlace(2);
+		pn.addPlace(2);
+		pn.addPlace(4);
+		pn.addPlace(0);
+		pn.addPlace(0);
+
 		pn.addTransition();
-			
-		pn.addArc();
-		pn.addArc();
-		pn.addArc();
-		pn.addArc();
-		pn.addArc();
-		
+
+		pn.addArc(PetriNet.ARC,1);
+		pn.addArc(PetriNet.ARC,2);
+		pn.addArc(PetriNet.ARC,1);
+		pn.addArc(PetriNet.ARC,1);
+		pn.addArc(PetriNet.ARC,3);
+
 		pn.relateArcPlace(places.get(0), arcs.get(0));
 		pn.relateArcPlace(places.get(1), arcs.get(1));
 		pn.relateArcPlace(places.get(2), arcs.get(2));
 		pn.relateArcPlace(places.get(3), arcs.get(3));
 		pn.relateArcPlace(places.get(4), arcs.get(4));
-		
+
 		pn.relateArcTransition(transitions.get(0), arcs.get(0), false);
 		pn.relateArcTransition(transitions.get(0), arcs.get(1), false);
 		pn.relateArcTransition(transitions.get(0), arcs.get(2), true);
 		pn.relateArcTransition(transitions.get(0), arcs.get(3), true);
 		pn.relateArcTransition(transitions.get(0), arcs.get(4), true);
-		
-		
-		arcs.get(0).setWeight(1);
-		arcs.get(1).setWeight(2);
-		arcs.get(2).setWeight(1);
-		arcs.get(3).setWeight(1);
-		arcs.get(4).setWeight(3);
-		
 
-		places.get(0).setTokens(2);
-		places.get(1).setTokens(3);
-		
-		
+
+
+
+
+
+
 		pn.fireAllTransitions();
-		
+
 		System.out.println(arcs.get(0).getPlace().getNbrTokens());
 		System.out.println(arcs.get(1).getPlace().getNbrTokens());
 		System.out.println(arcs.get(4).getPlace().getNbrTokens());
-		
-		
+
+
 	}
+
+
 
 }
